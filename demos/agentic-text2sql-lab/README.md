@@ -22,38 +22,21 @@ The adaptive policy explicitly tracks:
 - database-call cost
 - user-interruption cost
 
-It chooses among actions such as:
-
-- inspect schema
-- ask user
-- generate SQL
-- execute SQL
-- inspect the query plan
-- run deterministic verifiers
-- stop
+It chooses among actions such as schema inspection, clarification, SQL generation, execution, query-plan inspection, verification, and stopping.
 
 ## Run
 
 ```bash
 cd demos/agentic-text2sql-lab
 python aida_lab.py
-```
-
-Run the fixed-vs-adaptive comparison:
-
-```bash
 python benchmark.py
-```
-
-Run tests:
-
-```bash
+python gym.py
 python -m unittest -v
 ```
 
 No third-party dependencies are required.
 
-## Expected benchmark behavior
+## Single-episode benchmark
 
 The benchmark intentionally separates the agent's **internal verifier** from a hidden semantic oracle.
 
@@ -73,7 +56,31 @@ adaptive-uncertainty-aware:
 
 This failure mode is the point: **execution and self-verification do not resolve underspecified user intent**.
 
-The adaptive agent spends one extra interaction to resolve the ambiguity, then generates the revenue-growth query.
+## Generated SQL Agent Gym
+
+`gym.py` turns the toy case into generated episodes. Every seed creates a new database with randomized previous/current revenue and order counts plus a large cancelled-order distractor. The hidden user intent randomly chooses whether "growth" means revenue or order count.
+
+On the checked 50-episode run:
+
+```text
+adaptive-uncertainty-aware:
+  semantic_success_rate = 1.00
+  internal_verifier_mean = 1.00
+  mean_cost = 4.65
+  mean_tool_calls = 6
+  mean_user_interruptions = 1
+
+fixed-no-clarification:
+  semantic_success_rate = 0.48
+  internal_verifier_mean = 1.00
+  mean_cost = 2.65
+  mean_tool_calls = 5
+  mean_user_interruptions = 0
+```
+
+This is not intended as a scientific result; it is an executable proof of concept for the **accuracy–information–cost tradeoff** that a learned policy should optimize.
+
+The most interesting observation is that the fixed pipeline's internal verifier remains perfect even when semantic success is near chance. A verifier cannot validate information the system never acquired.
 
 ## Current architecture
 
@@ -103,17 +110,11 @@ The state is explicit instead of being buried entirely inside an LLM context win
 
 ### `SQLiteWorld`
 
-A minimal executable environment. It already has a read-only safety boundary for the demo.
+A minimal executable environment with a read-only safety boundary.
 
 ### `ToyReasoner`
 
-A drop-in placeholder. Replace with:
-
-- an API LLM
-- a local code model
-- a fine-tuned Text-to-SQL model
-- an ensemble
-- a semantic-IR compiler
+A drop-in placeholder. Replace with an API LLM, local code model, fine-tuned Text-to-SQL model, ensemble, or semantic-IR compiler.
 
 ### `VerifierBank`
 
@@ -121,18 +122,22 @@ Currently deterministic and intentionally incomplete. This should grow into a ba
 
 ### `AdaptivePolicy`
 
-Currently a transparent heuristic baseline. The real research target is to replace this policy with a learned controller.
+Currently a transparent heuristic baseline. The real research target is a learned controller.
+
+### `gym.py`
+
+A minimal environment generator. It is the first concrete step toward **SQL Agent Gym**: automatically generated data-agent episodes with hidden semantics and adversarial distractors.
 
 ## Why the toy benchmark is useful
 
-It captures a subtle but important distinction:
+It separates four notions that are often conflated:
 
 - **syntactic correctness**: does the SQL parse?
 - **execution correctness**: does it run?
 - **local verification**: does it satisfy known invariants?
 - **semantic correctness**: did it answer what the user actually meant?
 
-The fixed pipeline can pass the first three and fail the fourth.
+A system can pass the first three while failing the fourth.
 
 This motivates clarification, semantic memory, and value-of-information reasoning as first-class agent actions.
 
@@ -140,58 +145,15 @@ This motivates clarification, semantic memory, and value-of-information reasonin
 
 ### Stage 1 — Replace the toy reasoner
 
-Define an LLM adapter with structured outputs for:
+Define an LLM adapter with structured outputs for uncertainty estimates, clarification candidates, semantic plans, SQL candidates, and verifier claims while keeping the environment API unchanged.
 
-- uncertainty estimates
-- clarification candidates
-- semantic plan
-- SQL candidate
-- verifier claims
+### Stage 2 — Expand the tool space
 
-Keep the environment API unchanged.
+Add value sampling, documentation retrieval, historical-query retrieval, `EXPLAIN ANALYZE`, candidate comparison, generated unit tests, counterexample synthesis, and rollback-safe write transactions.
 
-### Stage 2 — Add more tools
+### Stage 3 — Expand SQL Agent Gym
 
-Add:
-
-- column/value sampling
-- documentation retrieval
-- historical-query retrieval
-- `EXPLAIN ANALYZE`
-- candidate comparison
-- generated unit tests
-- counterexample synthesis
-- rollback-safe write transactions
-
-### Stage 3 — Add a real benchmark adapter
-
-Wrap BIRD, Spider 2.0, LiveSQLBench, or BIRD-INTERACT episodes behind the same world interface.
-
-### Stage 4 — Learn the policy
-
-Start with simple methods before full RL:
-
-1. heuristic policy
-2. supervised imitation from successful trajectories
-3. contextual bandit for next-action selection
-4. offline RL over logged trajectories
-5. online RL in generated SQL Agent Gym environments
-
-### Stage 5 — Add a value-of-information objective
-
-For every possible action `a`, estimate:
-
-```text
-Q(a) = expected task-loss reduction - lambda * action_cost
-```
-
-This turns clarification, schema exploration, verification, and stopping into a unified decision problem.
-
-## Bolder extension: SQL Agent Gym
-
-The current code is intentionally small enough to become the seed of a full environment generator.
-
-A future `SQLAgentGym` could sample entire episodes containing:
+Generate episodes containing:
 
 - schema ambiguity
 - dirty values
@@ -204,6 +166,31 @@ A future `SQLAgentGym` could sample entire episodes containing:
 - temporal drift
 - adversarial documentation
 
-The environment generator and SQL agent could then co-evolve, producing an automatic curriculum of failure cases.
+Then train an adversarial environment generator to discover failure cases automatically.
+
+### Stage 4 — Add real benchmark adapters
+
+Wrap BIRD, Spider 2.0, LiveSQLBench, or BIRD-INTERACT episodes behind the same world interface.
+
+### Stage 5 — Learn the policy
+
+Progress from:
+
+1. heuristic policy
+2. supervised imitation from successful trajectories
+3. contextual bandit for next-action selection
+4. offline RL over logged trajectories
+5. online RL in generated SQL Agent Gym environments
+6. adversarial co-training between environment generator and SQL agent
+
+### Stage 6 — Value-of-information objective
+
+For every possible action `a`, estimate:
+
+```text
+Q(a) = expected task-loss reduction - lambda * action_cost
+```
+
+This turns clarification, schema exploration, verification, compute allocation, and stopping into one decision problem.
 
 See `docs/research/agentic-text2sql/MOONSHOTS.md` for the broader research program.
