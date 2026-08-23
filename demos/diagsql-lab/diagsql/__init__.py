@@ -1,3 +1,4 @@
+from .measurement import Measurement, MeasurementChoice, choose_measurement, expected_information_gain, normalize_diagnosis_probabilities
 from .diagnosis import minimal_hitting_sets, rank_diagnoses
 from .model import Assumption, AssumptionGraph, Conflict, Diagnosis, diagnosis_key
 
@@ -9,4 +10,9 @@ __all__ = [
     "diagnosis_key",
     "minimal_hitting_sets",
     "rank_diagnoses",
+    "Measurement",
+    "MeasurementChoice",
+    "choose_measurement",
+    "expected_information_gain",
+    "normalize_diagnosis_probabilities",
 ]
