@@ -2,6 +2,8 @@
 
 This document intentionally pushes past incremental Text-to-SQL work. The goal is to identify research programs that could redefine the problem rather than merely improve leaderboard accuracy.
 
+> For an even broader set of 60 remote cross-domain transfers, see [EXOTIC_IDEA_ATLAS.md](./EXOTIC_IDEA_ATLAS.md).
+
 ## 1. The Database Is the Agent's World Model
 
 Today a database is treated as a tool. A more radical framing is to treat it as the **external world state** of an embodied reasoning agent.
