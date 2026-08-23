@@ -1,3 +1,18 @@
+from .bird_interact import (
+    BirdAmbiguityLabel,
+    BirdDatasetStats,
+    BirdDiagnosticCase,
+    BirdInteractRecord,
+    BirdRuntimeTask,
+    MeasurementRecommendation,
+    load_bird_jsonl,
+    map_ambiguity_type,
+    parse_bird_interact_record,
+    recommend_measurements,
+    single_fault_cases,
+    summarize_bird_records,
+    to_runtime_task,
+)
 from .simulator import ControlledEpisode, ControlledMeasurement, DiagnosticTrace, run_active_diagnosis
 from .repair import RepairPlan, build_repair_plan
 from .delta import ddmin
@@ -25,4 +40,17 @@ __all__ = [
     "ControlledMeasurement",
     "DiagnosticTrace",
     "run_active_diagnosis",
+    "BirdAmbiguityLabel",
+    "BirdDatasetStats",
+    "BirdDiagnosticCase",
+    "BirdInteractRecord",
+    "BirdRuntimeTask",
+    "MeasurementRecommendation",
+    "load_bird_jsonl",
+    "map_ambiguity_type",
+    "parse_bird_interact_record",
+    "recommend_measurements",
+    "single_fault_cases",
+    "summarize_bird_records",
+    "to_runtime_task",
 ]
