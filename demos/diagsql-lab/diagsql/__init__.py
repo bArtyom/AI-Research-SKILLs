@@ -1,3 +1,4 @@
+from .repair import RepairPlan, build_repair_plan
 from .delta import ddmin
 from .measurement import Measurement, MeasurementChoice, choose_measurement, expected_information_gain, normalize_diagnosis_probabilities
 from .diagnosis import minimal_hitting_sets, rank_diagnoses
@@ -17,4 +18,6 @@ __all__ = [
     "expected_information_gain",
     "normalize_diagnosis_probabilities",
     "ddmin",
+    "RepairPlan",
+    "build_repair_plan",
 ]
