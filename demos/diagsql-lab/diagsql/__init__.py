@@ -1,3 +1,4 @@
+from .simulator import ControlledEpisode, ControlledMeasurement, DiagnosticTrace, run_active_diagnosis
 from .repair import RepairPlan, build_repair_plan
 from .delta import ddmin
 from .measurement import Measurement, MeasurementChoice, choose_measurement, expected_information_gain, normalize_diagnosis_probabilities
@@ -20,4 +21,8 @@ __all__ = [
     "ddmin",
     "RepairPlan",
     "build_repair_plan",
+    "ControlledEpisode",
+    "ControlledMeasurement",
+    "DiagnosticTrace",
+    "run_active_diagnosis",
 ]
