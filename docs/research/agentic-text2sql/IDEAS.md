@@ -2,6 +2,8 @@
 
 This note expands the research landscape into concrete, falsifiable projects. The emphasis is on ideas that can become papers rather than only engineering improvements.
 
+> For deliberately more distant cross-domain transfers, see [CROSS_DOMAIN_IDEAS.md](./CROSS_DOMAIN_IDEAS.md) and [EXOTIC_IDEA_ATLAS.md](./EXOTIC_IDEA_ATLAS.md). The latter adds 60 directions spanning physics, topology, information theory, cryptography, compilers, robotics, neuroscience, immunology, ecology, chemistry, economics, linguistics, category theory, operations research, and scientific methodology.
+
 ## Idea 1 — Learned Tool Router for SQL Agents
 
 ### Hypothesis
@@ -259,95 +261,95 @@ The agent starts with a compressed catalog and repeatedly chooses which schema n
 
 ### Novelty
 
-Use graph search or learned exploration over the schema graph, where each inspection reveals more nodes and metadata.
+This turns schema linking into a policy problem where every observation has cost.
 
-This matters for enterprise databases where passing the full schema to the model is impossible.
+Potential observations:
+
+- table summary
+- column names/types
+- foreign-key neighborhood
+- sample values
+- distinct-value sketches
+- lineage
+- documentation
 
 ---
 
-## Idea 10 — Query Plan as a Latent Reasoning Interface
+## Idea 10 — Semantic Unit Tests Before SQL Generation
 
 ### Hypothesis
 
-Agents may reason more robustly when generating a typed relational plan before SQL rather than directly producing SQL tokens.
+Generating expected semantic behaviors before generating SQL will improve reliability because the agent has a specification against which to test candidates.
 
-### Intermediate representation
+### Example tests
 
-A compact relational algebra / query graph:
+For “customers whose spend increased year over year”:
 
-- entities
-- joins
-- filters
-- aggregations
-- grouping
-- ordering
-- temporal constraints
-- business-rule annotations
+- customers with no prior-year spend should not silently divide by zero
+- cancelled orders should be excluded if business rules define revenue that way
+- aggregation grain must be customer
+- current and previous periods must have equal duration
 
-The agent can verify this graph independently from SQL syntax and compile it into multiple dialects.
-
-### Research question
-
-Does a plan representation improve cross-dialect transfer and semantic debugging?
+The SQL generator must satisfy the test suite rather than merely imitate an answer format.
 
 ---
 
-## Idea 11 — Multi-Agent Debate over Semantics, Not SQL Strings
-
-### Problem with ordinary multi-agent SQL
-
-Multiple agents often just generate multiple SQL strings and vote. This creates correlated errors.
-
-### Alternative
-
-Assign agents to produce competing **semantic interpretations**:
-
-- intent analyst
-- schema mapper
-- metric-definition specialist
-- temporal reasoning specialist
-- query-plan critic
-
-Only after disagreements are resolved is SQL compiled.
+## Idea 11 — Disagreement Graph of SQL Candidates
 
 ### Hypothesis
 
-Diversity at the semantic layer produces more useful disagreement than diversity at token generation.
+Candidate diversity is useful only if the system understands *where* candidates disagree.
+
+### Method
+
+Generate multiple SQL candidates, then construct a disagreement graph where edges encode differences in:
+
+- selected tables
+- join paths
+- predicates
+- metric definitions
+- aggregation grain
+- time interpretation
+- result behavior
+
+Ask tools or users only about the highest-impact disagreement component.
+
+### Contribution
+
+Turn ensemble diversity into targeted information acquisition instead of majority voting.
 
 ---
 
-## Idea 12 — Text-to-SQL as an Agent Curriculum Environment
+## Idea 12 — SQL Agent Curriculum from Failure Taxonomy
 
 ### Hypothesis
 
-SQL environments can provide a scalable curriculum for training general tool-using agents because rewards are executable and tasks naturally range from simple to long-horizon.
+Training on generic random SQL tasks wastes capacity. A curriculum generated from explicit semantic failure modes should improve agent robustness more efficiently.
 
-### Curriculum
+### Failure dimensions
 
-1. single-table selection
-2. joins
-3. aggregation
-4. nested queries
-5. external business rules
-6. hidden schema discovery
-7. ambiguity / clarification
-8. debugging
-9. optimization
-10. transactional operations
+- ambiguous metrics
+- hidden join duplication
+- dirty categorical values
+- wrong time grain
+- slowly changing dimensions
+- stale documentation
+- contradictory business rules
+- expensive scans
+- incomplete permissions
+- dialect mismatches
 
-### Broader significance
-
-The goal is not merely a better SQL agent. It is to use databases as a controlled environment for studying agentic reasoning, planning, and verification.
+The curriculum generator increases difficulty only after the agent masters each failure family and their combinations.
 
 ---
 
-# Recommended priority
+## Recommended grouping
 
-For a 2–4 month research project, prioritize:
+These twelve ideas form four coherent families:
 
-1. **Learned Tool Router** — strongest agentic framing and manageable implementation.
-2. **Counterexample-Driven Verification** — technically distinctive and easy to ablate.
-3. **Optimizer-in-the-Loop** — strong systems + LLM crossover.
-4. **Information-Gain Clarification** — high novelty, but evaluation requires interactive data.
+1. **Adaptive interaction** — Ideas 1, 2, 7, 9, 11
+2. **Verification and reliability** — Ideas 3, 4, 8, 10
+3. **Long-lived agents** — Ideas 5, 12
+4. **General data agents** — Idea 6
 
-For a larger 6–12 month effort, combine them into a unified adaptive data agent and train the orchestration policy end-to-end.
+For research beyond these families, the newer [EXOTIC_IDEA_ATLAS.md](./EXOTIC_IDEA_ATLAS.md) deliberately reframes the problem through remote disciplines rather than extending the same agent architecture.
