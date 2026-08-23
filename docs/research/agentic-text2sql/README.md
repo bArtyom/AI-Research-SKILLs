@@ -199,10 +199,13 @@ The frontier has already absorbed these ideas. A stronger paper should explain *
 
 ## Research package
 
-- [IDEAS.md](./IDEAS.md) — 12 concrete research ideas, ranked by novelty and feasibility
+- [IDEAS.md](./IDEAS.md) — initial concrete research ideas with falsifiable hypotheses
 - [ARCHITECTURE.md](./ARCHITECTURE.md) — proposed AIDA-SQL architecture and agent loop
 - [EXPERIMENTS.md](./EXPERIMENTS.md) — benchmark matrix, metrics, baselines, and staged experiments
 - [REFERENCES.md](./REFERENCES.md) — annotated reading list
+- [MOONSHOTS.md](./MOONSHOTS.md) — deliberately bold directions beyond standard Text-to-SQL
+- [CROSS_DOMAIN_IDEAS.md](./CROSS_DOMAIN_IDEAS.md) — transfers from classic methods in mathematics, NLP, vision, RL, formal methods, and systems
+- [EXOTIC_IDEA_ATLAS.md](./EXOTIC_IDEA_ATLAS.md) — 60 more distant cross-domain ideas spanning physics, topology, cryptography, compilers, robotics, neuroscience, immunology, ecology, chemistry, economics, linguistics, category theory, operations research, and scientific methodology
 
 ## Bottom line
 
@@ -210,4 +213,8 @@ The strongest direction is to stop treating Text-to-SQL as “natural language i
 
 > **Text-to-SQL is an interactive decision process in a partially observable data environment, where the agent must acquire evidence, synthesize executable programs, verify semantics, manage risk, and minimize total interaction cost.**
 
-That framing naturally connects Text-to-SQL with agent learning, software engineering agents, database systems, reinforcement learning, and human-agent interaction — and gives a much larger research surface than another SQL generation pipeline.
+An even broader framing now emerges from the cross-domain work:
+
+> **A future data agent may be a scientist-cartographer: it incrementally maps an organization’s hidden semantic world, reconciles incompatible local definitions, runs experiments against databases, maintains long-lived semantic memory, and emits auditable executable claims rather than just SQL strings.**
+
+That framing connects Text-to-SQL with agent learning, software engineering agents, database systems, reinforcement learning, formal methods, privacy, cognitive science, and scientific discovery — giving a much larger research surface than another SQL generation pipeline.
