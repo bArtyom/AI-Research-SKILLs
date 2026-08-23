@@ -36,7 +36,9 @@ diagsql/measurement.py  entropy / expected information gain / cost-aware action 
 diagsql/delta.py        1-minimal semantic failure-set reduction
 diagsql/repair.py       diagnosis-constrained repair scope
 diagsql/simulator.py    controlled hidden-fault active-diagnosis episodes
+diagsql/bird_interact.py leak-safe BIRD-INTERACT / Mini-Interact adapter
 benchmark.py            deterministic research demonstration
+bird_adapter.py         downloaded BIRD JSONL summary CLI
 ```
 
 ## Controlled benchmark
@@ -52,7 +54,7 @@ Each episode begins with a hard conflict that leaves two singleton diagnoses. A 
 A verified local run during implementation produced:
 
 ```text
-19 unit tests: PASS
+29 unit tests: PASS
 fixed top-1 diagnosis accuracy: 0.0
 active top-1 diagnosis accuracy: 1.0
 mean measurement cost: 0.4333
@@ -99,15 +101,43 @@ The intended novelty boundary is therefore narrow: **diagnose latent semantic as
 
 ## Next experiment
 
-The next adapter should target BIRD-INTERACT because it exposes both ambiguous and unambiguous user queries plus ambiguity metadata, hierarchical knowledge, a user simulator, and executable tests. A useful first real experiment is:
+The structural BIRD-INTERACT adapter is now in place. The next scientific step is to run it against a locally downloaded Mini-Interact JSONL file, measure the real ambiguity distribution, and then connect benchmark-legal actions to an interactive environment:
 
 ```text
 ambiguous task
-   -> force one wrong semantic choice
-   -> materialize candidate assumptions
-   -> derive initial conflict from test/user/knowledge evidence
-   -> compare fixed retrieval/regeneration against active diagnosis
-   -> measure root-cause Top-k, task repair success, user turns, DB calls, and cost
+   -> leak-safe runtime view
+   -> candidate semantic assumptions
+   -> ask_user / retrieve_knowledge / retrieve_column_meaning / inspect_schema / execute_sql
+   -> conflicts and diagnosis update
+   -> constrained repair
+   -> executable evaluation
 ```
 
-After that, map BIRD-CRITIC tasks into semantic-compatible vs purely SQL/runtime categories instead of claiming DiagSQL applies uniformly to all debugging issues.
+That experiment should compare fixed retrieval/regeneration against diagnosis-conditioned action selection under matched turn/BIRD-COIN budgets. Afterward, map BIRD-CRITIC tasks into semantic-compatible vs purely SQL/runtime categories instead of claiming DiagSQL applies uniformly to all debugging issues.
+
+## BIRD-INTERACT / Mini-Interact adapter
+
+`diagsql/bird_interact.py` adds a dependency-free structural adapter for downloaded BIRD-INTERACT JSONL files. The recommended first real dataset is Mini-Interact: the official project describes it as a 300-task SQLite, SELECT-only benchmark focused on knowledge-based ambiguity, making it much easier to iterate on diagnosis logic before moving to the full PostgreSQL environment.
+
+The adapter deliberately separates two views:
+
+```text
+BirdRuntimeTask
+    agent-visible: instance id, database, ambiguous query, safe task metadata
+
+BirdInteractRecord / BirdAmbiguityLabel
+    evaluator-side: normalized ambiguity annotations and optional oracle details
+```
+
+By default, evaluator details such as `sql_snippet`, deleted-knowledge IDs, the unambiguous query, gold SQL, and test cases are not preserved in ambiguity labels and never appear in `BirdRuntimeTask`. Use `preserve_evaluator_details=True` only for offline benchmark construction or analysis, never as runtime agent context.
+
+Inspect a locally downloaded dataset with:
+
+```bash
+cd demos/diagsql-lab
+python bird_adapter.py /path/to/mini_interact.jsonl
+```
+
+The CLI reports record counts, critical/non-critical/knowledge ambiguity counts, ambiguity-type frequencies, masked annotations, multi-critical tasks, and availability of optional evaluator fields. It does not download the benchmark or expose hidden ground truth to an agent.
+
+For controlled root-cause evaluation, `single_fault_cases(record)` produces one evaluator-only diagnostic case per critical ambiguity and maps BIRD annotation families into coarse DiagSQL fault families (`business_rule`, `schema`, `semantic`, `intent`, `other`). `recommend_measurements()` then proposes legal action families such as knowledge retrieval, schema inspection, column-meaning retrieval, diagnostic SQL, or user clarification. These are only action templates: the adapter intentionally does not invent outcome probabilities for the real BIRD user/database environment.
